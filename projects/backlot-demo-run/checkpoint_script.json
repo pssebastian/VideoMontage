@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "project_id": "backlot-demo-run",
+  "pipeline_type": "cinematic",
+  "stage": "script",
+  "status": "in_progress",
+  "timestamp": "2026-09-04T04:16:23.610182+00:00",
+  "checkpoint_policy": "guided",
+  "human_approval_required": true,
+  "human_approved": false,
+  "artifacts": {},
+  "style_playbook": "clean-professional"
+}

@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "title": "The Last Lighthouse",
+  "total_duration_seconds": 21,
+  "sections": [
+    {
+      "id": "s1",
+      "label": "Opening",
+      "text": "The coast holds its breath.",
+      "start_seconds": 0,
+      "end_seconds": 4
+    },
+    {
+      "id": "s2",
+      "label": "The beam sweeps the water",
+      "text": "Every night, the same promise.",
+      "start_seconds": 4,
+      "end_seconds": 9
+    },
+    {
+      "id": "s3",
+      "label": "A storm builds offshore",
+      "text": "Until the night the light went out.",
+      "start_seconds": 9,
+      "end_seconds": 15
+    },
+    {
+      "id": "s4",
+      "label": "The keeper climbs the stairs",
+      "text": "Someone still has to climb.",
+      "start_seconds": 15,
+      "end_seconds": 21
+    }
+  ]
+}
