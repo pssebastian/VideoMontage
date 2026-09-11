@@ -131,8 +131,8 @@ EXECUTE_STAGE(stage_name):
        - Continue to next stage
 
      If REVISE:
-       - Increment revision_counts[stage_name]
-       - If revision_counts[stage_name] >= 3:
+       - Increment revision_counts[stage_name] (persisted in checkpoint metadata)
+       - If revision_counts[stage_name] >= manifest.orchestration.max_revisions_per_stage (default 3):
            - PASS WITH WARNINGS (never block forever)
            - Log unresolved issues
        - Else:
@@ -350,13 +350,17 @@ Enhancement adjustments: {skip/add face_enhance, color_grade, etc.}
 
 ## Execution Limits (Anti-Loop Protection)
 
-| Limit | Value | Rationale |
-|-------|-------|-----------|
-| Max revisions per stage | 3 | Prevent perfectionism loops |
-| Max send-backs per stage pair | 1 | Prevent ping-pong between stages |
-| Max total send-backs | 3 | Cap total pipeline re-work |
-| Max total budget | Configurable (default $0.50) | Hard stop on spending |
-| Max total wall-time | 10 minutes | Timeout for entire pipeline (shorter than explainer — less generation) |
+Limits are governed dynamically by the pipeline manifest's `orchestration:` block:
+
+| Limit | Value Source | Default | Rationale |
+|-------|--------------|---------|-----------|
+| Max revisions per stage | `manifest.orchestration.max_revisions_per_stage` | 3 | Prevent perfectionism loops |
+| Max send-backs per stage pair | Fixed rule | 1 | Prevent ping-pong between stages |
+| Max total send-backs | `manifest.orchestration.max_send_backs` | 3 | Cap total pipeline re-work |
+| Max total budget | `manifest.orchestration.budget_default_usd` | $0.50 | Hard stop on spending |
+| Max total wall-time | `manifest.orchestration.max_wall_time_minutes` | 15 min | Timeout warning for entire pipeline |
+
+> **Wall-Time Monitoring (Lightweight)**: At each stage transition, inspect elapsed minutes since pipeline start (`project.json.created_at`). If elapsed exceeds `max_wall_time_minutes`, log a warning in `checkpoint.metadata` and wrap up to publish rather than scheduling further iterations.
 
 After any limit is hit: **proceed with warnings**, never block indefinitely.
 

@@ -97,7 +97,7 @@ EXECUTE_STAGE(stage_name):
 
   4. GATE DECISION
      If PASS → store artifact, update tracking, continue
-     If REVISE → increment revision count, re-run with feedback (max 3)
+     If REVISE → increment revision count (persisted in checkpoint metadata), re-run with feedback (max manifest.orchestration.max_revisions_per_stage, default 3)
      If SEND_BACK(target_stage) → re-execute from target forward (max 1 per pair)
 ```
 
@@ -258,15 +258,21 @@ Actual: {what was produced}
 | G7 | publish | Metadata, chapters, export packaging | Revise publish |
 | FINAL | all | Legibility, pacing, subtitles, audio | Send-back to specific stage |
 
-## Execution Limits
+## Execution Limits (Anti-Loop Protection)
 
-| Limit | Value | Rationale |
-|-------|-------|-----------|
-| Max revisions per stage | 3 | Prevent perfectionism loops |
-| Max send-backs per stage pair | 1 | Prevent ping-pong |
-| Max total send-backs | 3 | Cap total re-work |
-| Max total budget | Configurable (default $1) | Hard stop on spending |
-| Max total wall-time | 10 minutes | Screen-demo is simpler than generated pipelines |
+Limits are governed dynamically by the pipeline manifest's `orchestration:` block:
+
+| Limit | Value Source | Default | Rationale |
+|-------|--------------|---------|-----------|
+| Max revisions per stage | `manifest.orchestration.max_revisions_per_stage` | 3 | Prevent perfectionism loops |
+| Max send-backs per stage pair | Fixed rule | 1 | Prevent ping-pong |
+| Max total send-backs | `manifest.orchestration.max_send_backs` | 3 | Cap total re-work |
+| Max total budget | `manifest.orchestration.budget_default_usd` | $1.00 | Hard stop on spending |
+| Max total wall-time | `manifest.orchestration.max_wall_time_minutes` | 10 min | Screen-demo is simpler than generated pipelines |
+
+> **Wall-Time Monitoring (Lightweight)**: At each stage transition, inspect elapsed minutes since pipeline start (`project.json.created_at`). If elapsed exceeds `max_wall_time_minutes`, log a warning in `checkpoint.metadata` and wrap up to publish rather than scheduling further iterations.
+
+After any limit is hit: **proceed with warnings**, never block indefinitely.
 
 ## Common Pitfalls
 

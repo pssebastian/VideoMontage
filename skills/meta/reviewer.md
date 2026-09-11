@@ -83,8 +83,8 @@ Count findings by severity:
 | Scenario | Action |
 |----------|--------|
 | 0 critical, any suggestions/nitpicks | **Pass** — proceed to checkpoint. Note suggestions for the record. |
-| 1+ critical findings | **Revise** — fix all critical findings, then re-review (max 2 rounds). |
-| After 2 revision rounds, still critical | **Pass with warnings** — proceed anyway, note unresolved issues. Never block indefinitely. |
+| 1+ critical findings | **Revise** — fix all critical findings, then re-review (up to `manifest.orchestration.max_revisions_per_stage`, default 3 rounds). |
+| After max revision rounds, still critical | **Pass with warnings** — proceed anyway, note unresolved issues. Never block indefinitely. |
 
 ### Step 7: Record Review
 
@@ -121,7 +121,7 @@ Structure your review as:
 
 2. **Critical means critical.** Don't inflate severity. A missing schema field is critical. A slightly wordy paragraph is a suggestion. A comma splice is a nitpick.
 
-3. **Two rounds max.** The goal is shipping, not perfection. After two revision rounds, pass with warnings and move on. Perfectionism kills pipelines.
+3. **Respect revision caps (manifest is source of truth).** The goal is shipping, not perfection. The maximum revision count is governed by `manifest.orchestration.max_revisions_per_stage` (default: 3). After reaching the limit, pass with warnings and move on. Perfectionism kills pipelines.
 
 4. **Review the artifact, not the process.** You're checking the output, not how it was produced. If the brief is compelling, it doesn't matter if the agent used an unusual approach.
 

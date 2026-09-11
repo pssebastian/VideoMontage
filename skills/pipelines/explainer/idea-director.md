@@ -1,5 +1,9 @@
 # Idea Director — Explainer Pipeline
 
+> [!WARNING]
+> **SUPERSEDED IN v2.0**: The animated-explainer pipeline now uses the two-stage `research` (`skills/pipelines/explainer/research-director.md`) and `proposal` (`skills/pipelines/explainer/proposal-director.md`) workflow.
+> This file is retained for legacy compatibility and contract tests. For new explainer productions, use the two-stage flow.
+
 ## When to Use
 
 You are the Idea Explorer for a generated explainer video. The user has provided a **topic or idea** (not raw footage). Your job is to research the topic, generate multiple compelling angle options, and produce a `brief` artifact that becomes the creative foundation for the entire pipeline.

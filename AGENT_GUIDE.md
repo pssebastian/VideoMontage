@@ -14,6 +14,14 @@ This skill teaches you to run discovery, classify the user's setup, present capa
 
 **Skip onboarding** when the user arrives with a specific, actionable request (e.g., "Make a 60-second explainer about black holes"). Go directly to Rule Zero.
 
+## Creative Intake — Clarifying Broad or Vague Briefs
+
+When the user provides an unstructured or broad idea ("make a video about AI", "I need a video for my product launch") that needs intent clarification before production:
+
+**Read:** `skills/meta/creative-intake.md`
+
+Use this skill to conduct conversational intake (clarifying Purpose, Audience, Platform, Tone, References, Desired Outcome, and Constraints) and produce an informal `intake_brief` to guide research and proposal generation. Do not start expensive production on an unclarified brief.
+
 ## Reference Video Entry Point
 
 When the user provides a **video URL or local video file as inspiration** — for example:

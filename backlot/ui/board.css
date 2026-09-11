@@ -491,6 +491,10 @@ aside .panel:nth-of-type(1) { animation-delay: .32s } aside .panel:nth-of-type(2
 .stage.await .name { color: var(--amber); font-weight: 600; }
 .stage.await .sub { color: var(--amber); }
 
+.stage.rewound .node { border-color: var(--amber); color: var(--amber); background: var(--surface-2); border-style: dashed; }
+.stage.rewound .name { color: var(--text-3); text-decoration: line-through; }
+.stage.rewound .sub { color: var(--amber); font-style: italic; }
+
 .stage.failed .node { border-color: var(--red); color: var(--red); background: var(--red-dim); }
 .stage.failed .name { color: var(--red); }
 

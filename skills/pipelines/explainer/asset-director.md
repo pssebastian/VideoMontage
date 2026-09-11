@@ -41,7 +41,13 @@ Quick routing for common explainer needs:
 
 ### Step 1: Inventory Required Assets
 
-Walk every scene in the scene plan. For each `required_assets` entry, create an asset task:
+Walk every scene in the scene plan. Inventory all asset tasks:
+
+1. **Scene-required assets**: For each `required_assets` entry (diagrams, charts, code snippets).
+2. **Visual keyframes & concept anchors**: For each scene where `keyframe_strategy` requires generation (`single_i2v`, `start_and_end_frame`), or where concept anchors were planned. If the scene plan already references existing keyframes, adopt them directly with their recorded provenance.
+3. **Narration audio**: One per script section (use `tts_selector` or a concrete TTS provider).
+4. **Background music**: One track for the whole video (use `music_gen` or select from library).
+5. **Sound effects**: Per playbook's `sfx_style` (optional, use `music_gen` or stock).
 
 ```
 Asset Task:
@@ -53,10 +59,7 @@ Asset Task:
   estimated_cost: $0.00
 ```
 
-Also create tasks for:
-- **Narration audio** — one per script section (use `tts_selector` or a concrete TTS provider)
-- **Background music** — one track for the whole video (use `music_gen` or select from library)
-- **Sound effects** — per playbook's `sfx_style` (optional, use `music_gen` or stock)
+All generated assets — including keyframes and concept anchors — must be registered in `asset_manifest.assets[]` with complete provenance and factored into `total_cost_usd`.
 
 ### Step 2: Check Budget
 

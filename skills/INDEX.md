@@ -1,4 +1,4 @@
-﻿# OpenMontage â€" Skill Index
+# OpenMontage â€" Skill Index
 
 > For the full agent onboarding guide, see [`AGENT_GUIDE.md`](../AGENT_GUIDE.md) in the project root.
 
@@ -289,6 +289,8 @@ Cross-cutting skills that apply to all pipelines:
 | Onboarding | `meta/onboarding.md` | First-interaction greeting, capability discovery, starter prompts |
 | Reviewer | `meta/reviewer.md` | Self-review protocol after every stage |
 | Checkpoint Protocol | `meta/checkpoint-protocol.md` | When/how to checkpoint and request human approval |
+| Creative Intake | `meta/creative-intake.md` | Conversational intent clarification for vague/broad user briefs (Purpose, Audience, Platform, Tone, Constraints) |
+| Asset Intake Protocol | `meta/asset-intake-protocol.md` | Two-part zero-cost visual planning & complexity-based asset generation with mandatory cost disclosure |
 | Skill Creator | `meta/skill-creator.md` | Dynamically create new skills during pipeline runs |
 | Animation Runtime Selector | `meta/animation-runtime-selector.md` | Choose render runtime + animation library per scene |
 | Taste Direction | `meta/taste-direction.md` | Convert a brief into taste dials, anti-patterns, and reference strategy for proposal/playbook/atelier work |

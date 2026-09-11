@@ -29,8 +29,11 @@ For synthetic mode, the asset stage produces:
 | Prior artifacts | `state.artifacts["scene_plan"]["scene_plan"]`, `state.artifacts["script"]["script"]`, `state.artifacts["idea"]["brief"]` | What to produce |
 | Tools | `subtitle_gen`, `audio_enhance`, `tts_selector`, `image_selector`, `diagram_gen` — selectors auto-discover all available providers from the registry | Generation capabilities |
 | Playbook | Active style playbook | Typography and overlay styling |
+| Meta skill | `skills/meta/asset-intake-protocol.md` | User asset checks, cost disclosure, generation approval (Part 2) |
 
 ## Process
+
+> **Lightweight Asset Intake**: Check `projects/<id>/assets/references/` for user-provided screen recordings, voiceovers, intro/outro cards, logos, or brand overlays before producing assets. Present the **Service & Cost Disclosure Card** (from `skills/meta/asset-intake-protocol.md` Part 2) before generating paid TTS audio or assets.
 
 ### 1. Prioritize Utility Over Decoration
 

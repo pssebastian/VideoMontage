@@ -144,7 +144,7 @@ For audio:
 
 ### Step 3: Determine Output Profile
 
-Read the target platform from the brief artifact. Map to a media profile:
+Read the target platform from the `proposal_packet` or `edit_decisions` artifact. Map to a media profile:
 
 | Platform | Profile | Resolution | Notes |
 |----------|---------|-----------|-------|

@@ -4,14 +4,17 @@
 
 Read this skill when a pipeline director (scene-director or asset-director) tells you to. It teaches the complete Two-Part Asset Intake, Pre-Generation Cost Approval, and Edge-Case Handling protocols. It replaces improvised reference gathering with a structured, user-governed workflow.
 
-**Part 1** is used by scene-directors (between the approved script and the scene plan gate).
-**Part 2** is used by asset-directors (at the assets stage, after the visual storyboard is locked).
+**Part 1** is used by scene-directors (during the scene_plan stage). It is a **strictly zero-cost ($0.00) planning and reference audit step**. No billable images or keyframes are generated during Part 1.
+**Part 2** is used by asset-directors (at the assets stage). It executes the **Mixed Asset Generation Strategy** (visual keyframes, concept anchors, and audio assets) with mandatory cost disclosure and complete provenance registration into the asset manifest.
 
 Both parts share the **Pre-Generation Service & Cost Disclosure Card** — the mandatory approval gate before any paid generation call.
 
 ---
 
-## Part 1 — Visual Asset Intake & Keyframe Storyboard
+## Part 1 — Zero-Cost Visual Intake & Scene Strategy Planning ($0.00)
+
+> [!IMPORTANT]
+> **Zero-Cost Planning Gate**: The `scene_plan` stage must complete with **$0.00 in generation spend**. Do not call image generation tools, character sheet generators, or keyframe models during this stage. Visual intake in Part 1 is purely declarative and structural.
 
 ### Step 1: Script Entity Audit
 
@@ -35,12 +38,12 @@ Check `projects/<id>/assets/references/` for any files the user has already prov
 
 Also check: are there reference files that don't match any entity? If so, ask the user what they are for — they may reveal a creative intent the script didn't capture.
 
-### Step 3: Asset Gap Report
+### Step 3: Asset Gap Report & Generation Planning
 
 Present a structured report to the user:
 
 ```
-## Visual Asset Status
+## Visual Asset Status & Plan
 
 ### ✅ Matched (reference provided)
 | Entity | Category | Reference File | Scenes |
@@ -51,115 +54,88 @@ Present a structured report to the user:
 ### ❌ Missing (no reference)
 | Entity | Category | Scenes | Options |
 |--------|----------|--------|---------|
-| Suspect | Character | 3, 6 | (A) You provide a reference, (B) I generate concept art, (C) Rewrite scenes to avoid |
-| Warehouse exterior | Environment | 5 | (A) You provide a reference, (B) I generate concept art, (C) Rewrite scenes to avoid |
+| Suspect | Character | 3, 6 | (A) You provide a reference, (B) Generate concept art in assets stage, (C) Rewrite scenes to avoid |
+| Warehouse exterior | Environment | 5 | (A) You provide a reference, (B) Generate concept art in assets stage, (C) Rewrite scenes to avoid |
 
 ### Action Required
-Please choose an option for each missing asset, or upload reference files.
+Please choose an option for each missing asset, or upload reference files to assets/references/.
 ```
 
-**Wait for user response.** Do not proceed until every entity has a resolution (A, B, or C).
+**Wait for user response.** Record the user's choice in the scene plan metadata.
 
-### Step 4: Pre-Generation Service & Cost Disclosure Card
+### Step 4: Mixed Visual Strategy Planning (Complexity-Based)
 
-Before generating any concept art (Option B items), present the **Service & Cost Disclosure Card** (see full specification below). This applies to:
+For each scene in the `scene_plan`, determine its visual production strategy based on scene metadata:
 
-- Concept art / character sheet generation
-- Environment plate generation
-- Prop render generation
-- Storyboard keyframe generation
+1. **`procedural`** (Cost: $0.00):
+   - For `text_card`, `diagram`, `chart`, `code_snippet`, or `synthetic_terminal` scene types.
+   - Rendered natively via Remotion/HyperFrames/SVG. No image/video generation needed.
+2. **`source_footage`** (Cost: $0.00):
+   - When the user provided video clips or screen recordings in `assets/references/` or `assets/video/`.
+3. **`temporal_recycling`** (Cost: $0.00 for start frame):
+   - When the scene continues directly from the prior scene.
+   - Reuses the preceding scene's end frame as the starting anchor, preserving continuity without regenerating.
+4. **`single_i2v`** (Low-moderate cost):
+   - For scenes with moderate camera motion or ambient movement. Single anchor image used as video input.
+5. **`start_and_end_frame`** (Standard cost):
+   - For hero moments, major character actions, or precise choreographies requiring start and end keyframes.
+6. **`direct_t2v`** (Direct text-to-video):
+   - For atmospheric transitions, background plates, or b-roll where character identity locks are not required.
 
-### Step 5: Generate Concept Anchors
+Populate each scene definition in `scene_plan.json` with its planned `keyframe_strategy`, required prompts, and entity bindings, **without generating the image files**.
 
-For entities where the user chose Option B:
-
-1. **Character sheets**: Generate a multi-pose reference image (front, 3/4, profile) using `image_selector`. Use the script's character description as the prompt foundation. Include distinctive visual markers (clothing, accessories, scars, hair) that will persist across scenes.
-
-2. **Environment plates**: Generate a wide establishing shot of each missing environment. Include lighting, time-of-day, and atmosphere cues from the script.
-
-3. **Prop renders**: Generate isolated prop images on neutral backgrounds for compositing flexibility.
-
-Save all generated concept anchors to `projects/<id>/assets/concept_anchors/`. Present the full concept kit to the user for approval before proceeding. The user may request revisions to any individual anchor.
-
-### Step 6: Storyboard Keyframe Generation
-
-For each scene whose `type` is `generated`, `animation`, `broll`, or `character_scene`:
-
-1. **Construct the start frame prompt** from:
-   - The scene's `description` and `shot_language`
-   - Approved reference images for all entities present in the scene
-   - The style playbook's visual language constraints
-
-2. **Generate the start frame** using `image_selector` with:
-   - `image_paths` set to the approved references for this scene's entities
-   - `prompt` set to the constructed prompt
-   - `seed` recorded for reproducibility
-
-3. **Generate the end frame** conditioned on the start frame:
-   - Use `generation_mode: "edit"` with the start frame as input
-   - Apply the scene's `movement` and `camera_movement` to describe the end state
-   - This prevents identity drift between start and end of the same scene
-
-4. **Save keyframes** to `projects/<id>/assets/keyframes/<scene_id>_start.png` and `<scene_id>_end.png`.
-
-5. **Populate the scene plan** with:
-   ```json
-   "start_frame": {
-     "path": "assets/keyframes/scene-3_start.png",
-     "prompt": "<the prompt used>",
-     "source_reference_ids": ["detective_lin", "office_interior"],
-     "status": "generated"
-   },
-   "end_frame": {
-     "path": "assets/keyframes/scene-3_end.png",
-     "prompt": "<the prompt used>",
-     "source_reference_ids": ["detective_lin", "office_interior"],
-     "status": "generated"
-   },
-   "keyframe_strategy": "start_and_end_frame"
-   ```
-
-**For scenes that are `text_card`, `diagram`, or `transition` types**: Set `keyframe_strategy: "procedural"` — these are rendered by Remotion/HyperFrames components, not AI image generation. No keyframes needed.
-
-**For scenes with user-provided source footage**: Set `keyframe_strategy: "source_footage"` — the footage IS the visual.
-
-### Step 7: Selective Re-Roll Support
-
-The user may reject individual keyframes. When presenting the storyboard:
-
-- Each frame must be individually addressable by scene ID.
-- Regenerating one frame does NOT invalidate approved frames in other scenes.
-- If the user rejects a start frame, the corresponding end frame must also be regenerated (since it was conditioned on the start frame).
-- If the user rejects only the end frame, it can be regenerated independently while keeping the start frame.
-
-### Step 8: Visual Storyboard Checkpoint
-
-Present the complete visual storyboard as a filmstrip:
-
-```
-## Visual Storyboard — Ready for Review
-
-### Scene 1: "Detective arrives" (0s–5s)
-[Start Frame] → dolly_in, medium_close → [End Frame]
-Shot intent: Establish protagonist in context
-
-### Scene 2: "Office investigation" (5s–12s)
-[Start Frame] → pan_right, wide → [End Frame]
-Shot intent: Reveal the crime scene
-
-...
-
-### Action Required
-- Approve all → proceed to audio asset intake
-- Flag specific scenes → I'll regenerate those keyframes
-- Request scene changes → I'll update the scene plan and regenerate
-```
-
-Checkpoint with `status="awaiting_human"` and **END YOUR TURN**.
+Proceed to checkpoint the scene plan with `status="completed"` (or `status="awaiting_human"` if required by policy). The cost remains **$0.00**.
 
 ---
 
-## Part 2 — Non-Visual & Audio Asset Intake
+## Part 2 — Asset Generation & Audio Intake (Assets Stage)
+
+Part 2 runs during the `assets` stage under the Asset Director.
+
+### Phase 2A — Visual Asset Generation & Provenance Registration
+
+#### Step 1: Pre-Generation Service & Cost Disclosure Card
+Before generating any concept anchors or keyframes, calculate total estimated cost and present the mandatory **Service & Cost Disclosure Card** (see full specification below) for user sign-off.
+
+#### Step 2: Generate Concept Anchors (Option B Entities)
+For entities where the user approved AI concept generation:
+1. **Character sheets**: Generate multi-pose reference image using `image_selector`.
+2. **Environment plates**: Wide establishing shots saved to `projects/<id>/assets/concept_anchors/`.
+3. **Prop renders**: Isolated props on neutral backgrounds.
+
+#### Step 3: Generate Storyboard Keyframes
+Execute the approved `keyframe_strategy` per scene:
+- Generate start frames and end frames as planned, saved to `projects/<id>/assets/keyframes/<scene_id>_start.png` and `<scene_id>_end.png`.
+- Condition end frames on start frames to avoid identity drift.
+- Support **selective re-roll**: individual frames can be re-generated without invalidating others.
+
+#### Step 4: Mandatory Provenance Registration & Budget Reconciliation
+Every visual asset produced (concept anchors, keyframes, diagrams) **MUST be registered** into `asset_manifest.assets[]`:
+
+```json
+{
+  "id": "keyframe-scene-3-start",
+  "type": "keyframe",
+  "scene_id": "scene-3",
+  "path": "assets/keyframes/scene-3_start.png",
+  "source": "generated",
+  "tool": "image_selector",
+  "model": "imagen-3",
+  "seed": 42891,
+  "cost_usd": 0.04,
+  "provenance": {
+    "prompt": "Detective Lin inspecting desk, dramatic noir lighting...",
+    "reference_ids": ["detective_lin", "office_interior"]
+  }
+}
+```
+
+- **Budget reconciliation**: Add all keyframe and anchor costs into `asset_manifest.total_cost_usd`.
+- **Forward Compatibility**: If a legacy or resumed project already has generated keyframes recorded in `scene_plan`, adopt those records directly into `asset_manifest.assets[]` without re-generating them.
+
+---
+
+### Phase 2B — Non-Visual & Audio Asset Intake
 
 ### Step 1: Audio Entity Audit
 

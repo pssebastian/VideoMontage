@@ -99,5 +99,6 @@ export const STAGE_ICONS = {
   completed: "✓",
   in_progress: "◉",
   awaiting_human: "◈",
+  invalidated_by_upstream_rewind: "⟳",
   failed: "✕",
 };

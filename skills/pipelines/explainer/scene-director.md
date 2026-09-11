@@ -14,7 +14,7 @@ This is where words become visuals. A great script with a bad scene plan produce
 | Prior artifacts | `state.artifacts["script"]["script"]`, `state.artifacts["proposal"]["proposal_packet"]` | Script sections and proposal packet |
 | Playbook | Active style playbook | Visual language, transitions, motion rules |
 | Layer 3 | `.agents/skills/flux-best-practices/`, `.agents/skills/beautiful-mermaid/`, `.agents/skills/manim-composer/` | Image gen, diagram, animation knowledge |
-| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, keyframe generation, cost approval |
+| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, reference audit, zero-cost planning ($0.00) (Part 1) |
 
 ## Process
 
@@ -183,7 +183,7 @@ If the video includes narration, the script **must** be written to fit the video
 
 > **Overlays callout.** Overlays (titles, subtitles, HUD, watermarks, framing graphics, lower-thirds, section_title bars, stat_reveal chips, hero_title overlays, provider chips) are NOT part of the scene's foreground/midground/background depth axis. List them separately in scene metadata (`overlays: [...]`) with content and placement. Never describe an overlay as "in the foreground" — that confuses both downstream tools and any video-understanding model that re-analyzes the output.
 
-> **Before generating any keyframe or concept image, read and follow `skills/meta/asset-intake-protocol.md` Part 1.**
+> **Follow `skills/meta/asset-intake-protocol.md` Part 1 for visual asset intake, user reference audits, and zero-cost strategy planning ($0.00). All image and keyframe generations are deferred to the assets stage (Part 2).**
 
 ### Step 5: Validate Against Playbook
 

@@ -12,8 +12,12 @@ This stage prepares the actual spokesperson ingredients: narration, avatar or li
 | Prior artifacts | `state.artifacts["scene_plan"]["scene_plan"]`, `state.artifacts["script"]["script"]`, `state.artifacts["idea"]["brief"]` | Presenter plan and narration needs |
 | Tools | `talking_head`, `lip_sync`, `tts_selector`, `subtitle_gen`, `image_selector`, `audio_enhance` — selectors auto-discover all available providers from the registry | Avatar, narration, and support asset options |
 | Playbook | Active style playbook | Background, type, and subtitle rules |
+| Meta skill | `skills/meta/asset-intake-protocol.md` | User asset checks, cost disclosure, generation approval (Part 2) |
 
 ## Process
+
+> **Lightweight Asset Intake**: Before generating any avatar, narration, or support assets, check `projects/<id>/assets/references/` for user-provided backgrounds, presenter images/videos, logos, or audio tracks. Present the **Service & Cost Disclosure Card** (from `skills/meta/asset-intake-protocol.md` Part 2) before calling billable generation APIs.
+
 
 ### 1. Lock The Avatar Generation Path
 

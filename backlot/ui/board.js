@@ -108,6 +108,10 @@ function renderSlate(s) {
 // ---------------------------------------------------------------------------
 
 function stageSub(st) {
+  if (st.status === "invalidated_by_upstream_rewind") {
+    const from = st.rewind_source_stage ? ` (${st.rewind_source_stage} revised)` : "";
+    return `rewound${from}\npending re-run`;
+  }
   if (st.status === "awaiting_human") return "awaiting your approval\nreply in chat to continue";
   if (st.status === "in_progress" && st.stalled) {
     return `stalled? no activity for ${st.stalled_minutes}m\nask the agent for status`;
@@ -133,6 +137,7 @@ function renderRail(s) {
     const cls = st.status === "completed" ? "done"
       : st.status === "in_progress" ? (st.stalled ? "active stalled" : "active")
       : st.status === "awaiting_human" ? "await"
+      : st.status === "invalidated_by_upstream_rewind" ? "rewound"
       : st.status === "failed" ? "failed" : "";
     const icon = STAGE_ICONS[st.status] || String(pendingIndex);
     if (!STAGE_ICONS[st.status]) pendingIndex += 1;

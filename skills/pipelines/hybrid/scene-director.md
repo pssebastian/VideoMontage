@@ -12,7 +12,7 @@ You are translating the hybrid structure into a visual system that keeps the sou
 | Prior artifacts | `state.artifacts["script"]["script"]`, `state.artifacts["idea"]["brief"]` | Hybrid structure and source truth |
 | Tools | `frame_sampler`, `scene_detect` | Optional source inspection |
 | Playbook | Active style playbook | Layout consistency |
-| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, keyframe generation, cost approval |
+| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, reference audit, zero-cost planning ($0.00) (Part 1) |
 
 ## Process
 
@@ -49,7 +49,7 @@ Recommended metadata keys:
 - `variant_rules`
 - `overlay_density_limits`
 
-> **Before generating any keyframe or concept image, read and follow `skills/meta/asset-intake-protocol.md` Part 1.**
+> **Follow `skills/meta/asset-intake-protocol.md` Part 1 for visual asset intake, user reference audits, and zero-cost strategy planning ($0.00). All image and keyframe generations are deferred to the assets stage (Part 2).**
 
 ### 5. Quality Gate
 

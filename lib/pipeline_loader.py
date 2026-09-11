@@ -238,3 +238,28 @@ def get_permitted_extensions(manifest: dict) -> dict[str, bool]:
     }
     extensions = manifest.get("extensions", {})
     return {k: extensions.get(k, v) for k, v in defaults.items()}
+
+
+# ---------------------------------------------------------------------------
+# Orchestration Configuration Accessors
+# ---------------------------------------------------------------------------
+
+def get_orchestration_config(manifest: dict) -> dict[str, Any]:
+    """Return orchestration configuration from manifest, or empty dict if absent."""
+    return manifest.get("orchestration", {}) or {}
+
+
+def get_max_revisions(manifest: dict, default: int = 3) -> int:
+    """Return max revisions per stage declared in manifest orchestration."""
+    return get_orchestration_config(manifest).get("max_revisions_per_stage", default)
+
+
+def get_max_send_backs(manifest: dict, default: int = 3) -> int:
+    """Return max send-backs declared in manifest orchestration."""
+    return get_orchestration_config(manifest).get("max_send_backs", default)
+
+
+def get_max_wall_time_minutes(manifest: dict, default: int = 15) -> int:
+    """Return max wall time minutes declared in manifest orchestration."""
+    return get_orchestration_config(manifest).get("max_wall_time_minutes", default)
+

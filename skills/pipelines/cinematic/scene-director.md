@@ -12,7 +12,7 @@ You are deciding how each cinematic beat will look and transition. This is where
 | Prior artifacts | `state.artifacts["script"]["script"]`, `state.artifacts["proposal"]["proposal_packet"]` | Beat map and source truth |
 | Tools | `frame_sampler`, `scene_detect` | Source inspection and reframing checks |
 | Playbook | Active style playbook | Color and typography consistency |
-| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, keyframe generation, cost approval |
+| Meta skill | `skills/meta/asset-intake-protocol.md` | Visual asset intake, reference audit, zero-cost planning ($0.00) (Part 1) |
 
 ## Process
 
@@ -64,7 +64,7 @@ Recommended metadata keys:
 
 > **Overlays callout.** Overlays (titles, subtitles, HUD, watermarks, framing graphics, lower-thirds, name plates, end-tag cards) are NOT part of the scene's foreground/midground/background depth axis. List them separately in scene metadata (`overlays: [...]`) with content and placement. Never describe an overlay as "in the foreground" — that confuses both downstream tools and any video-understanding model that re-analyzes the output.
 
-> **Before generating any keyframe or concept image, read and follow `skills/meta/asset-intake-protocol.md` Part 1.**
+> **Follow `skills/meta/asset-intake-protocol.md` Part 1 for visual asset intake, user reference audits, and zero-cost strategy planning ($0.00). All image and keyframe generations are deferred to the assets stage (Part 2).**
 
 ### 6. Quality Gate
 

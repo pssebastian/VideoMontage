@@ -14,8 +14,10 @@
     },
     "status": {
       "type": "string",
-      "enum": ["completed", "failed", "awaiting_human", "in_progress"]
+      "enum": ["completed", "failed", "awaiting_human", "in_progress", "invalidated_by_upstream_rewind"]
     },
+    "rewind_source_stage": { "type": "string" },
+    "rewind_timestamp": { "type": "string", "format": "date-time" },
     "timestamp": { "type": "string", "format": "date-time" },
     "pipeline_type": { "type": "string", "description": "Pipeline manifest name" },
     "style_playbook": { "type": "string" },

@@ -221,6 +221,9 @@ def init_project(
         "assets/video",
         "assets/audio",
         "assets/music",
+        "assets/references",
+        "assets/concept_anchors",
+        "assets/keyframes",
         "renders",
     ):
         (project_dir / sub).mkdir(parents=True, exist_ok=True)
@@ -378,11 +381,73 @@ def _archive_superseded_checkpoint(path: Path, stage: str) -> None:
         if target.exists():
             target = history_dir / f"checkpoint_{stage}_{safe_stamp}_{path.stat().st_mtime_ns}.json"
         shutil.copyfile(path, target)
+
+        # Rolling retention: keep the most recent 5 archived checkpoints per stage
+        archives = sorted(
+            history_dir.glob(f"checkpoint_{stage}_*.json"),
+            key=lambda p: p.stat().st_mtime,
+        )
+        if len(archives) > 5:
+            for old_archive in archives[:-5]:
+                try:
+                    old_archive.unlink(missing_ok=True)
+                except OSError:
+                    pass
     except OSError:
         import logging
         logging.getLogger(__name__).warning(
             "Could not archive superseded checkpoint %s to history/", path
         )
+
+
+def _invalidate_downstream_checkpoints(
+    pipeline_dir: Path,
+    project_id: str,
+    pipeline_type: str,
+    current_stage: str,
+) -> list[str]:
+    """Archive and mark downstream checkpoints as invalidated when an upstream stage rewinds.
+
+    Preserves auditability: downstream checkpoints are archived to history/
+    and updated to status='invalidated_by_upstream_rewind' with rewind metadata,
+    preventing premature pipeline progression while retaining reviewable history.
+    """
+    stages = get_pipeline_stages(pipeline_type)
+    if current_stage not in stages:
+        return []
+
+    current_idx = stages.index(current_stage)
+    downstream_stages = stages[current_idx + 1 :]
+    invalidated: list[str] = []
+
+    for downstream in downstream_stages:
+        downstream_path = _checkpoint_path(pipeline_dir, project_id, downstream)
+        if not downstream_path.exists():
+            continue
+        try:
+            with open(downstream_path, encoding="utf-8") as f:
+                cp = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        if cp.get("status") in {"completed", "awaiting_human"}:
+            _archive_superseded_checkpoint(downstream_path, downstream)
+            cp["status"] = "invalidated_by_upstream_rewind"
+            cp["rewind_source_stage"] = current_stage
+            cp["rewind_timestamp"] = datetime.now(timezone.utc).isoformat()
+
+            tmp_downstream = downstream_path.with_suffix(".json.tmp")
+            try:
+                with open(tmp_downstream, "w", encoding="utf-8") as f:
+                    json.dump(cp, f, indent=2)
+                import os
+                os.replace(tmp_downstream, downstream_path)
+                invalidated.append(downstream)
+            except OSError:
+                if tmp_downstream.exists():
+                    tmp_downstream.unlink(missing_ok=True)
+
+    return invalidated
 
 
 def _decision_log_path(pipeline_dir: Path, project_id: str) -> Path:
@@ -411,8 +476,21 @@ def _merge_decision_log(
 
     existing_ids = {d["decision_id"] for d in existing.get("decisions", [])}
     for decision in new_log.get("decisions", []):
-        if decision.get("decision_id") not in existing_ids:
-            existing["decisions"].append(decision)
+        dec_id = decision.get("decision_id")
+        if not dec_id:
+            continue
+        if dec_id in existing_ids:
+            existing_match = next((d for d in existing["decisions"] if d.get("decision_id") == dec_id), None)
+            if existing_match and existing_match == decision:
+                continue
+            suffix = 1
+            while f"{dec_id}-rev{suffix}" in existing_ids:
+                suffix += 1
+            decision = dict(decision)
+            decision["decision_id"] = f"{dec_id}-rev{suffix}"
+            dec_id = decision["decision_id"]
+        existing["decisions"].append(decision)
+        existing_ids.add(dec_id)
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -521,8 +599,12 @@ def write_checkpoint(
         checkpoint["cost_snapshot"] = cost_snapshot
     if error is not None:
         checkpoint["error"] = error
-    if metadata is not None:
-        checkpoint["metadata"] = metadata
+    meta = dict(metadata) if metadata is not None else {}
+    if "revision_count" not in meta:
+        existing_cp_path = _checkpoint_path(pipeline_dir, project_id, stage)
+        existing_rev = get_stage_revision_count(pipeline_dir, project_id, stage)
+        meta["revision_count"] = existing_rev + 1 if existing_cp_path.exists() else 1
+    checkpoint["metadata"] = meta
 
     # Merge decision_log: if this checkpoint carries new decisions,
     # append them to the project-level decision log file, then write the
@@ -560,6 +642,12 @@ def write_checkpoint(
     _archive_superseded_checkpoint(path, stage)
     import os
     os.replace(tmp_path, path)
+
+    # Invalidate downstream checkpoints if an upstream stage rewinds
+    if status in {"completed", "awaiting_human"} and pipeline_type:
+        _invalidate_downstream_checkpoints(
+            pipeline_dir, project_id, pipeline_type, stage
+        )
 
     return path
 
@@ -631,3 +719,51 @@ def get_next_stage(
         if stage not in completed:
             return stage
     return None
+
+
+def get_stage_revision_count(
+    pipeline_dir: Path, project_id: str, stage: str
+) -> int:
+    """Return the current revision attempt count for this stage."""
+    current_path = _checkpoint_path(pipeline_dir, project_id, stage)
+    if current_path.exists():
+        try:
+            with open(current_path, encoding="utf-8") as f:
+                cp = json.load(f)
+            if isinstance(cp, dict) and "metadata" in cp and "revision_count" in cp["metadata"]:
+                return int(cp["metadata"]["revision_count"])
+        except (json.JSONDecodeError, OSError, ValueError):
+            pass
+
+    history_dir = pipeline_dir / project_id / HISTORY_DIRNAME
+    archives = list(history_dir.glob(f"checkpoint_{stage}_*.json")) if history_dir.exists() else []
+    return len(archives) + (1 if current_path.exists() else 0)
+
+
+def check_revision_limits(
+    pipeline_dir: Path,
+    project_id: str,
+    stage: str,
+    manifest: dict,
+) -> tuple[bool, int, int]:
+    """Check if the stage has reached or exceeded max_revisions_per_stage.
+
+    Returns (is_exceeded, current_revisions, max_revisions).
+    """
+    max_rev = manifest.get("orchestration", {}).get("max_revisions_per_stage", 3)
+    current_rev = get_stage_revision_count(pipeline_dir, project_id, stage)
+    return (current_rev >= max_rev, current_rev, max_rev)
+
+
+def get_invalidated_stages(
+    pipeline_dir: Path, project_id: str, pipeline_type: str | None = None
+) -> list[str]:
+    """Return list of stages that have been invalidated by an upstream rewind."""
+    stages_to_check = get_pipeline_stages(pipeline_type)
+    invalidated = []
+    for stage in stages_to_check:
+        cp = read_checkpoint(pipeline_dir, project_id, stage)
+        if cp and cp.get("status") == "invalidated_by_upstream_rewind":
+            invalidated.append(stage)
+    return invalidated
+
