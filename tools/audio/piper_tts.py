@@ -10,6 +10,7 @@ from typing import Any
 
 from tools.base_tool import (
     BaseTool,
+    DependencyError,
     Determinism,
     ExecutionMode,
     ResourceProfile,
@@ -105,6 +106,12 @@ class PiperTTS(BaseTool):
         if candidate:
             return candidate
         return None
+
+    def check_dependencies(self) -> None:
+        if not self._find_piper_cmd():
+            raise DependencyError(
+                f"Command 'piper' not found. {self.install_instructions}"
+            )
 
     def get_status(self) -> ToolStatus:
         if self._find_piper_cmd():

@@ -131,7 +131,12 @@ class TestPiperTTS:
                 return object()
             return original_import(name, *args, **kwargs)
 
-        monkeypatch.setattr(shutil, "which", lambda cmd: None if cmd == "piper" else original_which(cmd))
+        def fake_which(cmd, *args, **kwargs):
+            if Path(cmd).stem.lower() == "piper":
+                return None
+            return original_which(cmd, *args, **kwargs)
+
+        monkeypatch.setattr(shutil, "which", fake_which)
         monkeypatch.setattr(builtins, "__import__", fake_import)
 
         assert PiperTTS().get_status() == ToolStatus.UNAVAILABLE
